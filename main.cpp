@@ -1,65 +1,4 @@
-#define _GLIBCXX_USE_CXX11_ABI 0
-
-#include <iostream>
-#include <functional>
-#include <vector>
-#include <random>
-
-using namespace std;
-
-class Vartotojas
-{
-private:
-    string vardas;
-    string public_key; // 64 simboliu ilgio random simboliu stringas
-    float balansas;
-
-public:
-    Vartotojas(string p_k)
-    {
-        vardas = randomVardas();
-        public_key = p_k;
-        balansas = (rand() % 999901) + 100;
-    }
-    string randomVardas()
-    {
-        vector<string> vardai = {"Jonas", "Antanas", "Petras", "Dovydas", "Tomas", "Greta", "Dominyka", "Ramune", "Ieva", "Migle"};
-        string vardas = vardai[rand() % vardai.size()];
-        return vardas;
-    }
-    void updateBal(float num)
-    {
-        balansas = num;
-    }
-    inline string getVardas() const { return vardas; }
-    inline string getPK() const { return public_key; }
-    inline float getBal() const { return balansas; }
-};
-
-class Transakcija
-{
-private:
-    string transaction_id;
-    string sender;
-    string receiver;
-    float amount;
-
-public:
-    Transakcija(string s, string r, float a)
-    {
-        sender = s;
-        receiver = r;
-        amount = a;
-        transaction_id = "";
-    }
-    inline string getID() const { return transaction_id; }
-    inline string getSender() const { return sender; }
-    inline string getReceiver() const { return receiver; }
-    inline float getAmount() const { return amount; }
-};
-
-string generuotiPK(vector<string> pkvec);
-Transakcija generuotiTransakcija(vector<Vartotojas> var, vector<Transakcija> tr);
+#include "header.h"
 
 int main()
 {
@@ -81,19 +20,6 @@ int main()
     {
         Transakcija tr = generuotiTransakcija(vartotojai, transakcijos);
         transakcijos.push_back(tr);
-        for (int i = 0; i < vartotojai.size(); i++)
-        {
-            if (tr.getSender() == vartotojai[i].getPK())
-            {
-                int bal = vartotojai[i].getBal() - tr.getAmount();
-                vartotojai[i].updateBal(bal);
-            }
-            else if (tr.getReceiver() == vartotojai[i].getPK())
-            {
-                int bal = vartotojai[i].getBal() + tr.getAmount();
-                vartotojai[i].updateBal(bal);
-            }
-        }
     }
     for (auto tran : transakcijos)
     {
@@ -105,10 +31,15 @@ int main()
     {
         cout << var.getPK() << " " << var.getBal() << endl;
     }
+    cout << "-----" << endl;
+    formuotiBloka(transakcijos);
+    string input = "hsdjhf";
+    string output = stringHash(input);
+    cout << output << endl;
     return 0;
 }
 
-string generuotiPK(vector<string> pkvec)
+string generuotiPK(vector<string> &pkvec)
 {
     string pk;
     char a;
@@ -133,7 +64,7 @@ string generuotiPK(vector<string> pkvec)
     return pk;
 }
 
-Transakcija generuotiTransakcija(vector<Vartotojas> var, vector<Transakcija> tran)
+Transakcija generuotiTransakcija(vector<Vartotojas> &var, vector<Transakcija> &tran)
 {
     int s = rand() % var.size();
     int r = rand() % var.size();
@@ -155,6 +86,31 @@ Transakcija generuotiTransakcija(vector<Vartotojas> var, vector<Transakcija> tra
     }
 
     Transakcija tr(var[s].getPK(), var[r].getPK(), a);
+    int bal1 = var[s].getBal() - a;
+    var[s].updateBal(bal1);
+    int bal2 = var[r].getBal() + a;
+    var[r].updateBal(bal2);
 
     return tr;
+}
+
+void formuotiBloka(vector<Transakcija> &tran)
+{
+    vector<Transakcija> tr;
+    for (int i = 0; i < 10; i++)
+    {
+        int num = rand() % tran.size();
+        tr.push_back(tran[num]);
+        tran.erase(tran.begin() + num);
+    }
+    for (auto t1 : tr)
+    {
+        cout << t1.getAmount() << " ";
+    }
+    cout << endl;
+    for (auto t2 : tran)
+    {
+        cout << t2.getAmount() << " ";
+    }
+    cout << endl;
 }
