@@ -102,6 +102,10 @@ public:
     {
         prevHash = hash;
     }
+    void setDiff(string diff)
+    {
+        difficulty = diff;
+    }
     string combine()
     {
         return prevHash + date + version + tranIDHash + to_string(nonce) + difficulty;
@@ -110,9 +114,25 @@ public:
     {
         return transakcijos;
     }
-    string print()
+    float sumTr()
     {
-        return (prevHash + " " + date + " " + version + " " + tranIDHash + " " + to_string(nonce) + " " + difficulty);
+        int sum = 0;
+        for (auto const &tr : transakcijos)
+        {
+            sum += tr.getAmount();
+        }
+        return sum;
+    }
+    void print()
+    {
+        cout << "prevHash: " << prevHash << endl;
+        cout << "date: " << date;
+        cout << "version: " << version << endl;
+        cout << "tranIDHash: " << tranIDHash << endl;
+        cout << "nonce: " << nonce << endl;
+        cout << "difficulty: " << difficulty << endl;
+        cout << "}" << endl;
+        cout << endl;
     }
 };
 
@@ -129,9 +149,17 @@ public:
     }
     void print()
     {
+        int n = 0;
         for (auto blokas : list)
         {
-            cout << blokas.print() << endl;
+            cout << "{" << endl;
+            cout << "heigh: " << n << endl;
+            cout << "depth: " << list.size() - n << endl;
+            cout << "total amount: " << blokas.sumTr() << endl;
+            cout << "transactions: " << blokas.getTran().size() << endl;
+            cout << "avg amount: " << blokas.sumTr() * 1.0 / blokas.getTran().size() << endl;
+            blokas.print();
+            n++;
         }
     }
     int size()

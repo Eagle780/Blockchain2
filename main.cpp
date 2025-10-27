@@ -10,7 +10,7 @@ int main()
     cout << "priekis" << endl;
     srand(time(0));
     int varInt = 1000;
-    int trInt = 9000;
+    int trInt = 10000;
     vartotojai.reserve(varInt);
     pkvector.reserve(varInt);
     transakcijos.reserve(trInt);
@@ -25,18 +25,15 @@ int main()
     {
         Transakcija tr = generuotiTransakcija(vartotojai);
         transakcijos.push_back(tr);
-        if (i % 1000 == 0)
-            cout << i << endl;
+        if (i > 9900)
+        {
+            cout << "Sender: " << tr.getSender() << endl;
+            cout << "Receiver: " << tr.getReceiver() << endl;
+            cout << "Amount: " << tr.getAmount() << endl;
+            cout << "ID: " << tr.getID() << endl;
+        }
     }
     cout << "transakcijos sugeneruotos" << endl;
-    /*
-    cout << "sugeneruotos transakcijos: ";
-    for (auto tran : transakcijos)
-    {
-        cout << tran.getAmount() << " ";
-    }
-    cout << endl;
-    */
     while (!transakcijos.empty())
     {
         Blokas b = formuotiBloka(transakcijos, diff);
@@ -94,7 +91,6 @@ Transakcija generuotiTransakcija(vector<Vartotojas> &var)
     }
     else
     {
-        cout << "yo" << endl;
         a = 2.0;
         random_device rd;
         mt19937 gen(rd());
@@ -128,14 +124,6 @@ Blokas formuotiBloka(vector<Transakcija> &tran, const string &diff)
         if (tran.empty())
             break;
     }
-    /*
-    cout << "pasirinktos transakcijos: ";
-    for (auto t1 : tr)
-    {
-        cout << t1.getAmount() << " ";
-    }
-    cout << endl;
-    */
     return Blokas(visuTranHash(tr), diff, tr);
 }
 
@@ -161,6 +149,7 @@ void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff)
         string hash = stringHash(b.back().combine());
         a.setPrevHash(hash);
     }
+    a.setDiff(diff);
     for (int i = 0; i < max; i++)
     {
         a.changeNonce(i);
@@ -169,7 +158,6 @@ void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff)
         if (hash.rfind(diff, 0) == 0)
         {
             b.pushBack(a);
-            cout << hash << endl;
             if (i < max / 2)
             {
                 diff += '0';
