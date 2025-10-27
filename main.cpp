@@ -9,8 +9,8 @@ int main()
     string diff = string(3, '0');
     cout << "priekis" << endl;
     srand(time(0));
-    int varInt = 100;
-    int trInt = 1000;
+    int varInt = 1000;
+    int trInt = 9000;
     vartotojai.reserve(varInt);
     pkvector.reserve(varInt);
     transakcijos.reserve(trInt);
@@ -25,6 +25,8 @@ int main()
     {
         Transakcija tr = generuotiTransakcija(vartotojai);
         transakcijos.push_back(tr);
+        if (i % 1000 == 0)
+            cout << i << endl;
     }
     cout << "transakcijos sugeneruotos" << endl;
     /*
@@ -78,14 +80,22 @@ Transakcija generuotiTransakcija(vector<Vartotojas> &var)
 {
     int s = rand() % var.size();
     int r = rand() % var.size();
+    float a = 0;
     while (var[s].getPK() == var[r].getPK())
     {
         r = rand() % var.size();
     }
-    float a = rand() % int(var[s].getBal());
-    if (a == 0.0)
+    if (var[s].getBal() > 1)
     {
-        a = 1.0;
+        while (a == 0)
+        {
+            a = rand() % int(var[s].getBal()) / 2.0;
+        }
+    }
+    else
+    {
+        cout << "yo" << endl;
+        a = 2.0;
         random_device rd;
         mt19937 gen(rd());
         uniform_real_distribution<> dis(0.0, 1.0);
@@ -104,7 +114,7 @@ Transakcija generuotiTransakcija(vector<Vartotojas> &var)
     return tr;
 }
 
-Blokas formuotiBloka(vector<Transakcija> tran, const string &diff)
+Blokas formuotiBloka(vector<Transakcija> &tran, const string &diff)
 {
     vector<Transakcija> tr;
     int n = 100;
@@ -115,6 +125,8 @@ Blokas formuotiBloka(vector<Transakcija> tran, const string &diff)
         tr.push_back(move(tran[num]));
         tran[num] = move(tran.back());
         tran.pop_back();
+        if (tran.empty())
+            break;
     }
     /*
     cout << "pasirinktos transakcijos: ";
@@ -158,18 +170,6 @@ void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff)
         {
             b.pushBack(a);
             cout << hash << endl;
-            for (const auto &tran : a.getTran())
-            {
-                for (int i = 0; i < tr.size(); i++)
-                {
-                    if (tr[i].getID() == tran.getID())
-                    {
-                        tr[i] = move(tr.back());
-                        tr.pop_back();
-                        continue;
-                    }
-                }
-            }
             if (i < max / 2)
             {
                 diff += '0';
@@ -179,4 +179,5 @@ void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff)
     }
     if (diff.size() > 1)
         diff.pop_back();
+    kastiBloka(b, a, tr, diff);
 }

@@ -146,6 +146,6 @@ public:
 
 string generuotiPK(vector<string> &pkvec);
 Transakcija generuotiTransakcija(vector<Vartotojas> &var);
-Blokas formuotiBloka(vector<Transakcija> tran, const string &diff);
+Blokas formuotiBloka(vector<Transakcija> &tran, const string &diff);
 string visuTranHash(const vector<Transakcija> &tr);
 void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff);
