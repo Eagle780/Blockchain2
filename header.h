@@ -9,6 +9,8 @@
 #include <sstream>
 #include <iomanip>
 #include <list>
+#include <ctime>
+#include <chrono>
 
 using namespace std;
 
@@ -57,8 +59,7 @@ public:
         sender = s;
         receiver = r;
         amount = a;
-        transaction_id = "";
-        // TODO hashavimas
+        transaction_id = stringHash(s + r + to_string(a));
     }
     inline string getID() const { return transaction_id; }
     inline string getSender() const { return sender; }
@@ -75,32 +76,78 @@ private:
     string tranIDHash;
     int nonce;
     int difficulty;
+    vector<Transakcija> transakcijos;
 
 public:
-    Blokas(string ph, string d, string v, string tIDh, int di)
+    Blokas(string tIDh, int di, vector<Transakcija> tr)
     {
-        prevHash = ph;
-        date = d;
-        version = v;
+        prevHash = "";
+        version = "1.0";
         tranIDHash = tIDh;
         nonce = 0;
         difficulty = di;
+        transakcijos = tr;
     }
     void changeNonce(int n)
     {
         nonce = n;
+    }
+    void setDate()
+    {
+        auto t = chrono::system_clock::now();
+        time_t data = chrono::system_clock::to_time_t(t);
+        date = ctime(&data);
+    }
+    void setPrevHash(string hash)
+    {
+        prevHash = hash;
+    }
+    string combine()
+    {
+        return prevHash + date + version + tranIDHash + to_string(nonce) + to_string(difficulty);
+    }
+    vector<Transakcija> getTran()
+    {
+        return transakcijos;
+    }
+    string print()
+    {
+        return (prevHash + " " + date + " " + version + " " + tranIDHash + " " + to_string(nonce) + " " + to_string(difficulty));
     }
 };
 
 class Blockchain
 {
 private:
-    std::list<Blokas> list;
+    list<Blokas> list;
 
 public:
-    // metodai
+    Blockchain() : list() {}
+    void pushBack(Blokas a)
+    {
+        string hash;
+        if (list.size() == 0)
+        {
+            hash = string(64, '0');
+        }
+        else
+        {
+            hash = stringHash(list.back().combine());
+        }
+        a.setPrevHash(hash);
+        list.push_back(a);
+    }
+    void print()
+    {
+        for (auto blokas : list)
+        {
+            cout << blokas.print() << endl;
+        }
+    }
 };
 
 string generuotiPK(vector<string> &pkvec);
 Transakcija generuotiTransakcija(vector<Vartotojas> &var, vector<Transakcija> &tr);
-void formuotiBloka(vector<Transakcija> &tran);
+Blokas formuotiBloka(vector<Transakcija> tran);
+string visuTranHash(vector<Transakcija> tr);
+void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr);
