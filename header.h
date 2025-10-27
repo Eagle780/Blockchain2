@@ -81,7 +81,7 @@ private:
 public:
     Blokas(string tIDh, string di, vector<Transakcija> tr)
     {
-        prevHash = "";
+        prevHash = string(64, '0');
         version = "1.0";
         tranIDHash = tIDh;
         nonce = 0;
@@ -106,7 +106,7 @@ public:
     {
         return prevHash + date + version + tranIDHash + to_string(nonce) + difficulty;
     }
-    vector<Transakcija> getTran()
+    const vector<Transakcija> &getTran() const
     {
         return transakcijos;
     }
@@ -125,16 +125,6 @@ public:
     Blockchain() : list() {}
     void pushBack(Blokas a)
     {
-        string hash;
-        if (list.size() == 0)
-        {
-            hash = string(64, '0');
-        }
-        else
-        {
-            hash = stringHash(list.back().combine());
-        }
-        a.setPrevHash(hash);
         list.push_back(a);
     }
     void print()
@@ -143,6 +133,14 @@ public:
         {
             cout << blokas.print() << endl;
         }
+    }
+    int size()
+    {
+        return list.size();
+    }
+    Blokas back()
+    {
+        return list.back();
     }
 };
 

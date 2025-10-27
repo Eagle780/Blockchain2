@@ -9,17 +9,19 @@ int main()
     string diff = string(3, '0');
     cout << "priekis" << endl;
     srand(time(0));
-    vartotojai.reserve(100);
-    pkvector.reserve(100);
-    transakcijos.reserve(1000);
-    for (int i = 0; i < 100; i++)
+    int varInt = 100;
+    int trInt = 1000;
+    vartotojai.reserve(varInt);
+    pkvector.reserve(varInt);
+    transakcijos.reserve(trInt);
+    for (int i = 0; i < varInt; i++)
     {
         string pk = generuotiPK(pkvector);
         Vartotojas var(pk);
         vartotojai.push_back(var);
     }
     cout << "vartotojai sugeneruoti" << endl;
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < trInt; i++)
     {
         Transakcija tr = generuotiTransakcija(vartotojai);
         transakcijos.push_back(tr);
@@ -39,7 +41,7 @@ int main()
         kastiBloka(blockchain, b, transakcijos, diff);
     }
     cout << "blockchainas sudarytas" << endl;
-    // blockchain.print();
+    blockchain.print();
     cout << "galas" << endl;
     return 0;
 }
@@ -142,6 +144,11 @@ string visuTranHash(const vector<Transakcija> &tr)
 void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff)
 {
     int max = 100000;
+    if (b.size() != 0)
+    {
+        string hash = stringHash(b.back().combine());
+        a.setPrevHash(hash);
+    }
     for (int i = 0; i < max; i++)
     {
         a.changeNonce(i);
@@ -149,10 +156,9 @@ void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff)
         string hash = stringHash(a.combine());
         if (hash.rfind(diff, 0) == 0)
         {
-            a.setDate();
             b.pushBack(a);
-            // cout << hash << endl;
-            for (auto tran : a.getTran())
+            cout << hash << endl;
+            for (const auto &tran : a.getTran())
             {
                 for (int i = 0; i < tr.size(); i++)
                 {
@@ -160,7 +166,6 @@ void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff)
                     {
                         tr[i] = move(tr.back());
                         tr.pop_back();
-                        tr.erase(tr.begin() + i);
                         continue;
                     }
                 }
