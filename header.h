@@ -75,11 +75,11 @@ private:
     string version;
     string tranIDHash;
     int nonce;
-    int difficulty;
+    string difficulty;
     vector<Transakcija> transakcijos;
 
 public:
-    Blokas(string tIDh, int di, vector<Transakcija> tr)
+    Blokas(string tIDh, string di, vector<Transakcija> tr)
     {
         prevHash = "";
         version = "1.0";
@@ -104,7 +104,7 @@ public:
     }
     string combine()
     {
-        return prevHash + date + version + tranIDHash + to_string(nonce) + to_string(difficulty);
+        return prevHash + date + version + tranIDHash + to_string(nonce) + difficulty;
     }
     vector<Transakcija> getTran()
     {
@@ -112,7 +112,7 @@ public:
     }
     string print()
     {
-        return (prevHash + " " + date + " " + version + " " + tranIDHash + " " + to_string(nonce) + " " + to_string(difficulty));
+        return (prevHash + " " + date + " " + version + " " + tranIDHash + " " + to_string(nonce) + " " + difficulty);
     }
 };
 
@@ -147,7 +147,7 @@ public:
 };
 
 string generuotiPK(vector<string> &pkvec);
-Transakcija generuotiTransakcija(vector<Vartotojas> &var, vector<Transakcija> &tr);
-Blokas formuotiBloka(vector<Transakcija> tran);
-string visuTranHash(vector<Transakcija> tr);
-void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr);
+Transakcija generuotiTransakcija(vector<Vartotojas> &var);
+Blokas formuotiBloka(vector<Transakcija> tran, const string &diff);
+string visuTranHash(const vector<Transakcija> &tr);
+void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff);

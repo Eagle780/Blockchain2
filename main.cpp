@@ -6,30 +6,41 @@ int main()
     vector<string> pkvector;
     vector<Transakcija> transakcijos;
     Blockchain blockchain;
+    string diff = string(3, '0');
+    cout << "priekis" << endl;
     srand(time(0));
-    for (int i = 0; i < 10; i++)
+    vartotojai.reserve(100);
+    pkvector.reserve(100);
+    transakcijos.reserve(1000);
+    for (int i = 0; i < 100; i++)
     {
         string pk = generuotiPK(pkvector);
         Vartotojas var(pk);
         vartotojai.push_back(var);
     }
-    for (int i = 0; i < 20; i++)
+    cout << "vartotojai sugeneruoti" << endl;
+    for (int i = 0; i < 1000; i++)
     {
-        Transakcija tr = generuotiTransakcija(vartotojai, transakcijos);
+        Transakcija tr = generuotiTransakcija(vartotojai);
         transakcijos.push_back(tr);
     }
+    cout << "transakcijos sugeneruotos" << endl;
+    /*
     cout << "sugeneruotos transakcijos: ";
     for (auto tran : transakcijos)
     {
         cout << tran.getAmount() << " ";
     }
     cout << endl;
+    */
     while (!transakcijos.empty())
     {
-        Blokas b = formuotiBloka(transakcijos);
-        kastiBloka(blockchain, b, transakcijos);
+        Blokas b = formuotiBloka(transakcijos, diff);
+        kastiBloka(blockchain, b, transakcijos, diff);
     }
-    blockchain.print();
+    cout << "blockchainas sudarytas" << endl;
+    // blockchain.print();
+    cout << "galas" << endl;
     return 0;
 }
 
@@ -39,26 +50,29 @@ string generuotiPK(vector<string> &pkvec)
     char a;
     while (true)
     {
-        pk = "";
+        pk.clear();
         for (int i = 0; i < 64; i++)
         {
             a = (rand() % 94) + 33;
             pk += a;
         }
-        for (auto pkv : pkvec)
+        bool arKartojasi = false;
+        for (const auto &pkv : pkvec)
         {
             if (pkv == pk)
             {
+                arKartojasi = true;
                 continue;
             }
         }
-        break;
+        if (!arKartojasi)
+            break;
     }
     pkvec.push_back(pk);
     return pk;
 }
 
-Transakcija generuotiTransakcija(vector<Vartotojas> &var, vector<Transakcija> &tran)
+Transakcija generuotiTransakcija(vector<Vartotojas> &var)
 {
     int s = rand() % var.size();
     int r = rand() % var.size();
@@ -88,29 +102,36 @@ Transakcija generuotiTransakcija(vector<Vartotojas> &var, vector<Transakcija> &t
     return tr;
 }
 
-Blokas formuotiBloka(vector<Transakcija> tran)
+Blokas formuotiBloka(vector<Transakcija> tran, const string &diff)
 {
     vector<Transakcija> tr;
-    for (int i = 0; i < 10; i++)
+    int n = 100;
+    tr.reserve(n);
+    for (int i = 0; i < n; ++i)
     {
         int num = rand() % tran.size();
-        tr.push_back(tran[num]);
-        tran.erase(tran.begin() + num);
+        tr.push_back(move(tran[num]));
+        tran[num] = move(tran.back());
+        tran.pop_back();
     }
+    /*
     cout << "pasirinktos transakcijos: ";
     for (auto t1 : tr)
     {
         cout << t1.getAmount() << " ";
     }
     cout << endl;
-    return Blokas(visuTranHash(tr), 1, tr);
-    // TODO: bloko kintamuosius passint i pacia funk
+    */
+    return Blokas(visuTranHash(tr), diff, tr);
 }
 
-string visuTranHash(vector<Transakcija> tr)
+string visuTranHash(const vector<Transakcija> &tr)
 {
+    if (tr.empty())
+        return string();
+
     string hash = tr[0].getID();
-    int n = tr.size();
+    int n = (int)tr.size();
     for (int i = 1; i < n; i++)
     {
         hash = stringHash(hash + tr[i].getID());
@@ -118,30 +139,39 @@ string visuTranHash(vector<Transakcija> tr)
     return hash;
 }
 
-void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr)
+void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff)
 {
-    for (int i = 0; i < 10000; i++)
+    int max = 100000;
+    for (int i = 0; i < max; i++)
     {
         a.changeNonce(i);
         a.setDate();
         string hash = stringHash(a.combine());
-        if (hash[0] == '0' && hash[1] == '0' && hash[2] == '0')
+        if (hash.rfind(diff, 0) == 0)
         {
             a.setDate();
             b.pushBack(a);
-            cout << "yo" << endl;
+            // cout << hash << endl;
             for (auto tran : a.getTran())
             {
                 for (int i = 0; i < tr.size(); i++)
                 {
                     if (tr[i].getID() == tran.getID())
                     {
+                        tr[i] = move(tr.back());
+                        tr.pop_back();
                         tr.erase(tr.begin() + i);
                         continue;
                     }
                 }
             }
+            if (i < max / 2)
+            {
+                diff += '0';
+            }
             return;
         }
     }
+    if (diff.size() > 1)
+        diff.pop_back();
 }
