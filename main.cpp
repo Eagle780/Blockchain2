@@ -19,6 +19,10 @@ int main()
         string pk = generuotiPK(pkvector);
         Vartotojas var(pk);
         vartotojai.push_back(var);
+        if (i <= 10)
+        {
+            cout << var.getPK() << " " << var.getBal() << endl;
+        }
     }
     cout << "vartotojai sugeneruoti" << endl;
     for (int i = 0; i < trInt; i++)
@@ -37,10 +41,14 @@ int main()
     while (!transakcijos.empty())
     {
         Blokas b = formuotiBloka(transakcijos, diff);
-        kastiBloka(blockchain, b, transakcijos, diff);
+        kastiBloka(blockchain, b, transakcijos, diff, vartotojai);
     }
     cout << "blockchainas sudarytas" << endl;
     blockchain.print();
+    for (int i = 0; i < 10; i++)
+    {
+        cout << vartotojai[i].getPK() << " " << vartotojai[i].getBal() << endl;
+    }
     cout << "galas" << endl;
     return 0;
 }
@@ -82,6 +90,11 @@ Transakcija generuotiTransakcija(vector<Vartotojas> &var)
     {
         r = rand() % var.size();
     }
+    while (a == 0)
+    {
+        a = rand() % int(var[s].getBal());
+    }
+    /*
     if (var[s].getBal() > 1)
     {
         while (a == 0)
@@ -100,12 +113,12 @@ Transakcija generuotiTransakcija(vector<Vartotojas> &var)
             a = dis(gen);
         }
     }
-
-    Transakcija tr(var[s].getPK(), var[r].getPK(), a);
     int bal1 = var[s].getBal() - a;
     var[s].updateBal(bal1);
     int bal2 = var[r].getBal() + a;
     var[r].updateBal(bal2);
+    */
+    Transakcija tr(var[s].getPK(), var[r].getPK(), a);
 
     return tr;
 }
@@ -118,9 +131,7 @@ Blokas formuotiBloka(vector<Transakcija> &tran, const string &diff)
     for (int i = 0; i < n; ++i)
     {
         int num = rand() % tran.size();
-        tr.push_back(move(tran[num]));
-        tran[num] = move(tran.back());
-        tran.pop_back();
+        tr.push_back(tran[num]);
         if (tran.empty())
             break;
     }
@@ -141,9 +152,10 @@ string visuTranHash(const vector<Transakcija> &tr)
     return hash;
 }
 
-void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff)
+void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff, vector<Vartotojas> &var)
 {
     int max = 100000;
+    float bal;
     if (b.size() != 0)
     {
         string hash = stringHash(b.back().combine());
@@ -162,10 +174,33 @@ void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff)
             {
                 diff += '0';
             }
+            for (auto const &tran : a.getTran())
+            {
+                for (int i = 0; i < tr.size(); i++)
+                {
+                    if (tran.getID() == tr[i].getID())
+                    {
+                        tr[i] = move(tr.back());
+                        tr.pop_back();
+                    }
+                }
+                for (auto &v : var)
+                {
+                    if (tran.getSender() == v.getPK())
+                    {
+                        bal = v.getBal() - tran.getAmount();
+                        v.updateBal(bal);
+                    }
+                    else if (tran.getReceiver() == v.getPK())
+                    {
+                        bal = v.getBal() + tran.getAmount();
+                        v.updateBal(bal);
+                    }
+                }
+            }
             return;
         }
     }
     if (diff.size() > 1)
         diff.pop_back();
-    kastiBloka(b, a, tr, diff);
 }

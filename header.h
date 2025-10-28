@@ -152,13 +152,16 @@ public:
         int n = 0;
         for (auto blokas : list)
         {
-            cout << "{" << endl;
-            cout << "heigh: " << n << endl;
-            cout << "depth: " << list.size() - n << endl;
-            cout << "total amount: " << blokas.sumTr() << endl;
-            cout << "transactions: " << blokas.getTran().size() << endl;
-            cout << "avg amount: " << blokas.sumTr() * 1.0 / blokas.getTran().size() << endl;
-            blokas.print();
+            if (list.size() - n <= 10)
+            {
+                cout << "{" << endl;
+                cout << "heigh: " << n << endl;
+                cout << "depth: " << list.size() - n << endl;
+                cout << "total amount: " << blokas.sumTr() << endl;
+                cout << "transactions: " << blokas.getTran().size() << endl;
+                cout << "avg amount: " << blokas.sumTr() * 1.0 / blokas.getTran().size() << endl;
+                blokas.print();
+            }
             n++;
         }
     }
@@ -176,4 +179,4 @@ string generuotiPK(vector<string> &pkvec);
 Transakcija generuotiTransakcija(vector<Vartotojas> &var);
 Blokas formuotiBloka(vector<Transakcija> &tran, const string &diff);
 string visuTranHash(const vector<Transakcija> &tr);
-void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff);
+void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff, vector<Vartotojas> &var);
