@@ -24,13 +24,13 @@ Tam buvo sukurtos vartotojo, transakcijos, bloko ir pačios blokų grandinės kl
 
 1. Klonuokite repozitoriją:
 
-    git clone https://github.com/Eagle780/Blockshain2.git
+       git clone https://github.com/Eagle780/Blockshain2.git
 
 2. Repositoriją atidarykite savo pasirinktame kodo redaktoriuje (pvz. VS Code) ir atidarykite terminalą.
 3. Įrašykite:
 
-    g++ blockchain main.cpp hash.cpp
-   ./blockchain
+       g++ blockchain main.cpp hash.cpp
+       ./blockchain
 
 Visus sekančius žingsnius programa atliks automatiškai.
 
