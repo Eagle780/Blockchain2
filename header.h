@@ -11,10 +11,24 @@
 #include <list>
 #include <ctime>
 #include <chrono>
+#include <atomic>
+#include <thread>
+#include <mutex>
+#include <memory>
 
 using namespace std;
 
 string stringHash(string str);
+
+struct MerkleNode {
+    string hash;
+    shared_ptr<MerkleNode> left;
+    shared_ptr<MerkleNode> right;
+    
+    MerkleNode(const string& h) : hash(h), left(nullptr), right(nullptr) {}
+    MerkleNode(const string& h, shared_ptr<MerkleNode> l, shared_ptr<MerkleNode> r) 
+        : hash(h), left(l), right(r) {}
+};
 
 class Vartotojas
 {
@@ -73,17 +87,17 @@ private:
     string prevHash;
     string date;
     string version;
-    string tranIDHash;
+    string merkleRoot;
     int nonce;
     string difficulty;
     vector<Transakcija> transakcijos;
 
 public:
-    Blokas(string tIDh, string di, vector<Transakcija> tr)
+    Blokas(string mr, string di, vector<Transakcija> tr)
     {
         prevHash = string(64, '0');
         version = "1.0";
-        tranIDHash = tIDh;
+        merkleRoot = mr;
         nonce = 0;
         difficulty = di;
         transakcijos = tr;
@@ -108,7 +122,10 @@ public:
     }
     string combine()
     {
-        return prevHash + date + version + tranIDHash + to_string(nonce) + difficulty;
+        return prevHash + date + version + merkleRoot + to_string(nonce) + difficulty;
+    }
+    string calculateMerkleRoot() const {
+        return ::calculateMerkleRoot(transakcijos);
     }
     const vector<Transakcija> &getTran() const
     {
@@ -128,9 +145,10 @@ public:
         cout << "prevHash: " << prevHash << endl;
         cout << "date: " << date;
         cout << "version: " << version << endl;
-        cout << "tranIDHash: " << tranIDHash << endl;
+        cout << "merkleRoot: " << merkleRoot << endl;
         cout << "nonce: " << nonce << endl;
         cout << "difficulty: " << difficulty << endl;
+        cout << "transactions count: " << transakcijos.size() << endl;
         cout << "}" << endl;
         cout << endl;
     }
@@ -180,3 +198,36 @@ Transakcija generuotiTransakcija(vector<Vartotojas> &var);
 Blokas formuotiBloka(vector<Transakcija> &tran, const string &diff);
 string visuTranHash(const vector<Transakcija> &tr);
 void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff, vector<Vartotojas> &var);
+
+//naujos f-cjos
+shared_ptr<MerkleNode> buildMerkleTree(const vector<string>& hashes);
+string calculateMerkleRoot(const vector<Transakcija>& transactions);
+
+// Improved mining functions
+bool mineBlock(Blokas& block, const string& difficulty, int maxAttempts, int& attemptsMade);
+vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const string& difficulty, int count);
+void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks, vector<Transakcija>& transactions, 
+                       string& difficulty, vector<Vartotojas>& users, int maxTimeSeconds);
+
+// Transaction validation
+bool validateTransaction(const Transakcija& transaction, const vector<Vartotojas>& users);
+
+//UTXO model
+class UTXO {
+private:
+    string txId;
+    string owner;
+    float amount;
+    bool spent;
+    
+public:
+    UTXO(const string& id, const string& own, float amt) : txId(id), owner(own), amount(amt), spent(false) {}
+    string getTxId() const { return txId; }
+    string getOwner() const { return owner; }
+    float getAmount() const { return amount; }
+    bool isSpent() const { return spent; }
+    void markSpent() { spent = true; }
+};
+
+// Global UTXO pool
+extern vector<UTXO> utxoPool;
