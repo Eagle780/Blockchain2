@@ -7,9 +7,9 @@ Tam buvo sukurtos vartotojo, transakcijos, bloko ir pačios blokų grandinės kl
 
 1. Vartotojų generavimas
    Programa sukuria 1,000 vartotojų, kiekvienam iš jų priskirdama vardą, viešąjį raktą (kuris sudarytas iš 64 atsitiktinių ASCII simbolių) ir atsitiktinį balansą nuo 100 iki 1,000,000.
-   Kiekvieno vartotojo viešasis raktas išsaugomas atskirame raktų vektoriuje, kuris yra peržiūrima skiekvieną kartą kuriant naują viešąjį raktą, taip išvengiant pasikartojimų.
+   Kiekvieno vartotojo viešasis raktas išsaugomas atskirame raktų vektoriuje, kuris yra peržiūrimas kiekvieną kartą kuriant naują viešąjį raktą, taip išvengiant pasikartojimų.
 2. Transakcijų generavimas
-   Programa sugeneruoja 10,000 transakcijų paimdama atsitiktinį siuntėją, gavėją (prieš tai patikrinant, ar jie nesutampa) ir atsitiktinį skaičių tarp 1 ir siuntėjo balanso. Kiekviena transakcija tusi savo ID kuris yra siuntėjo,
+   Programa sugeneruoja 10,000 transakcijų paimdama atsitiktinį siuntėją, gavėją (prieš tai patikrinant, ar jie nesutampa) ir atsitiktinį skaičių tarp 1 ir siuntėjo balanso. Kiekviena transakcija turi savo ID, kuris yra siuntėjo,
    gavėjo ir siunčiamos sumos hash'as.
 4. Naujo bloko formavimas
    Programa pasirenka 100 atsitiktinių transakcijų iš sąrašo ir sukuria naują bloką su transakcijomis, jų bendru hash'u ir sunkumo lygiu (nulių kiekį, kurį reikia gauti bloko hash'o pradžioje kasimo metu)
@@ -24,12 +24,12 @@ Tam buvo sukurtos vartotojo, transakcijos, bloko ir pačios blokų grandinės kl
 
 1. Klonuokite repozitoriją:
 
-       git clone https://github.com/Eagle780/Blockshain2.git
+       git clone https://github.com/Eagle780/Blockchain2.git
 
 2. Repositoriją atidarykite savo pasirinktame kodo redaktoriuje (pvz. VS Code) ir atidarykite terminalą.
 3. Įrašykite:
 
-       g++ blockchain main.cpp hash.cpp
+       g++ -o blockchain main.cpp hash.cpp
        ./blockchain
 
 Visus sekančius žingsnius programa atliks automatiškai.
