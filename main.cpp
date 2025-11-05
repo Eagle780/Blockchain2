@@ -38,11 +38,37 @@ int main()
         }
     }
     cout << "transakcijos sugeneruotos" << endl;
-    while (!transakcijos.empty())
+
+    int miningRound = 1;
+    int baseTimeLimit = 5; 
+
+    while (!transakcijos.empty() && miningRound <= 10)
     {
-        Blokas b = formuotiBloka(transakcijos, diff);
-        kastiBloka(blockchain, b, transakcijos, diff, vartotojai);
+        cout << "\n--- Mining Round " << miningRound << " ---" << endl;
+        cout << "Remaining transactions: " << transakcijos.size() << endl;
+        cout << "Current difficulty: " << diff << endl;
+
+         auto candidateBlocks = generateCandidateBlocks(transakcijos, diff, 5);
+        cout << "Generated " << candidateBlocks.size() << " candidate blocks" << endl;
+    
+        if (candidateBlocks.empty()) {
+        cout << "No valid candidate blocks generated. Ending mining." << endl;
+        break;}
+
+        parallelMineBlocks(blockchain, candidateBlocks, transakcijos, diff, vartotojai, baseTimeLimit);
+    
+        miningRound++;
+    
+        // Adjust difficulty based on mining performance
+        if (miningRound % 2 == 0 && diff.size() > 2) {
+        diff.pop_back();
+        cout << "Decreased difficulty to: " << diff << endl;
     }
+
+       /* Blokas b = formuotiBloka(transakcijos, diff);
+        kastiBloka(blockchain, b, transakcijos, diff, vartotojai);*/
+    }
+
     cout << "blockchainas sudarytas" << endl;
     blockchain.print();
     for (int i = 0; i < 10; i++)
@@ -128,14 +154,17 @@ Blokas formuotiBloka(vector<Transakcija> &tran, const string &diff)
     vector<Transakcija> tr;
     int n = 100;
     tr.reserve(n);
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < n && !tran.empty(); ++i)
     {
         int num = rand() % tran.size();
         tr.push_back(tran[num]);
-        if (tran.empty())
-            break;
+        tran[num] = move(tran.back());
+        tran.pop_back();
+        /*if (tran.empty())
+            break;*/
     }
-    return Blokas(visuTranHash(tr), diff, tr);
+    string merkleRoot = calculateMerkleRoot(tr);
+    return Blokas(merkleRoot, diff, tr); 
 }
 
 string visuTranHash(const vector<Transakcija> &tr)
