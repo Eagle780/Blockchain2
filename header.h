@@ -15,8 +15,16 @@
 #include <thread>
 #include <mutex>
 #include <memory>
+#include <algorithm>
 
 using namespace std;
+
+class Vartotojas;
+class Transakcija;
+class Blokas;
+class Blockchain;
+struct MerkleNode;
+
 
 string stringHash(string str);
 
@@ -29,6 +37,9 @@ struct MerkleNode {
     MerkleNode(const string& h, shared_ptr<MerkleNode> l, shared_ptr<MerkleNode> r) 
         : hash(h), left(l), right(r) {}
 };
+
+shared_ptr<MerkleNode> buildMerkleTree(const vector<string>& hashes);
+string calculateMerkleRoot(const vector<Transakcija>& transactions);
 
 class Vartotojas
 {
@@ -120,9 +131,12 @@ public:
     {
         difficulty = diff;
     }
-    string combine()
+    string combine() const
     {
         return prevHash + date + version + merkleRoot + to_string(nonce) + difficulty;
+    }
+    string getHash() const {
+        return stringHash(combine());
     }
     string calculateMerkleRoot() const {
         return ::calculateMerkleRoot(transakcijos);
@@ -131,7 +145,7 @@ public:
     {
         return transakcijos;
     }
-    float sumTr()
+    float sumTr() const
     {
         int sum = 0;
         for (auto const &tr : transakcijos)
@@ -140,7 +154,7 @@ public:
         }
         return sum;
     }
-    void print()
+    void print() const
     {
         cout << "prevHash: " << prevHash << endl;
         cout << "date: " << date;
@@ -165,7 +179,7 @@ public:
     {
         list.push_back(a);
     }
-    void print()
+    void print() const
     {
         int n = 0;
         for (auto blokas : list)
@@ -183,11 +197,11 @@ public:
             n++;
         }
     }
-    int size()
+    int size() const
     {
         return list.size();
     }
-    Blokas back()
+    Blokas back() const
     {
         return list.back();
     }
@@ -199,21 +213,18 @@ Blokas formuotiBloka(vector<Transakcija> &tran, const string &diff);
 string visuTranHash(const vector<Transakcija> &tr);
 void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff, vector<Vartotojas> &var);
 
-//naujos f-cjos
-shared_ptr<MerkleNode> buildMerkleTree(const vector<string>& hashes);
-string calculateMerkleRoot(const vector<Transakcija>& transactions);
 
 // Improved mining functions
 bool mineBlock(Blokas& block, const string& difficulty, int maxAttempts, int& attemptsMade);
-vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const string& difficulty, int count);
+vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const string& difficulty, int count, const vector<Vartotojas>& users);
 void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks, vector<Transakcija>& transactions, 
-                       string& difficulty, vector<Vartotojas>& users, int maxTimeSeconds);
+                        string& difficulty, vector<Vartotojas>& users, int maxTimeSeconds);
 
 // Transaction validation
 bool validateTransaction(const Transakcija& transaction, const vector<Vartotojas>& users);
 
 //UTXO model
-class UTXO {
+/*class UTXO {
 private:
     string txId;
     string owner;
@@ -230,4 +241,4 @@ public:
 };
 
 // Global UTXO pool
-extern vector<UTXO> utxoPool;
+extern vector<UTXO> utxoPool;*/
