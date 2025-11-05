@@ -216,7 +216,7 @@ void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff, 
 
 // Improved mining functions
 bool mineBlock(Blokas& block, const string& difficulty, int maxAttempts, int& attemptsMade);
-vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const string& difficulty, int count, const vector<Vartotojas>& users);
+vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const string& difficulty, int count, const vector<Vartotojas>& user, const Blockchain& bockchain);
 void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks, vector<Transakcija>& transactions, 
                         string& difficulty, vector<Vartotojas>& users, int maxTimeSeconds);
 

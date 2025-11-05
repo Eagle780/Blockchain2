@@ -48,7 +48,7 @@ int main()
         cout << "Remaining transactions: " << transakcijos.size() << endl;
         cout << "Current difficulty: " << diff << endl;
 
-         auto candidateBlocks = generateCandidateBlocks(transakcijos, diff, 5, vartotojai);
+         auto candidateBlocks = generateCandidateBlocks(transakcijos, diff, 5, vartotojai, blockchain);
         cout << "Generated " << candidateBlocks.size() << " candidate blocks" << endl;
     
         if (candidateBlocks.empty()) {

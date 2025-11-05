@@ -17,10 +17,17 @@ bool mineBlock(Blokas& block, const string& difficulty, int maxAttempts, int& at
     return false;
 }
 
-vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const string& difficulty, int count, const vector<Vartotojas>& users) {
+vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const string& difficulty, int count, const vector<Vartotojas>& users, const Blockchain& blockchain) {
     vector<Blokas> candidates;
     candidates.reserve(count);
     
+    string prevHash;
+    if (blockchain.size() == 0) {
+        prevHash = string(64, '0'); // Genesis block
+    } else {
+        prevHash = blockchain.back().getHash(); // Last block in actual chain
+    }
+
     // Create a temporary copy of transactions to avoid modifying original too early
     vector<Transakcija> tempTransactions = transactions;
     
@@ -47,8 +54,9 @@ vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const 
         
         if (!blockTransactions.empty()) {
             string merkleRoot = calculateMerkleRoot(blockTransactions);
-            string prevHash = (i == 0) ? string(64, '0') : candidates.back().getHash();
+           // string prevHash = (i == 0) ? string(64, '0') : candidates.back().getHash();
             candidates.emplace_back(merkleRoot, difficulty, blockTransactions);
+            candidates.back().setPrevHash(prevHash);
         }
     }
     
