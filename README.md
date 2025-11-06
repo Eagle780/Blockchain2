@@ -40,3 +40,41 @@ Visus sekančius žingsnius programa atliks automatiškai.
 
 <img width="914" height="185" alt="Transakcijos informacijso pavyzdys" src="https://github.com/user-attachments/assets/2e8d8ee0-5bcc-4319-99b0-994c1389fbb6" />
 
+## 2 programos dalis
+ Šioje programoje įgyvendinta supaprastint blokų grandinė. Su tokiomis funkcijomis:
+
+1. Įgyvendintas Merkle Tree ir Merkle Root Hash. 
+2. Transakcijų patvirtinimas tikrinant balansą ir maišos funkcijas.
+3. Patobulintas kasimo procesas imituojant decentralizuotą kasimą (sugeneruojami 5 kandidatiniai blokai, jų kasimas apribotas laiku arba bandymų skaičiumi, o neiškasus - didinamas laikas arba bandymų skaičius)
+4. Įgyvendintas lygiagretus kasimas
+
+
+**Programos struktūra**
+
+blockchain2/
+- header.h
+- main.cpp
+- hash.cpp
+- merkle.cpp
+- mining.cpp
+- README.md
+
+**Pagrindinės klasės**
+- Vartotojas
+- Transakcija
+- Blokas
+- Blockchain
+
+
+**Komanda kompiliavimui:**
+
+``
+g++ -o blockchain main.cpp hash.cpp merkle.cpp mining.cpp -std=c++17 -pthread
+``
+
+**Programos paleidimas:**
+
+``
+./blockchain
+``
+
