@@ -59,10 +59,20 @@ int main()
     
         miningRound++;
     
-        // Adjust difficulty based on mining performance
-        if (miningRound % 2 == 0 && diff.size() > 2) {
-        diff.pop_back();
-        cout << "Decreased difficulty to: " << diff << endl;
+        if (miningRound % 3 == 0 && diff.size() > 2) {
+        if (blockchain.size() == 0 || blockchain.back().getHash().find(diff) != 0) {
+
+        if (diff.size() > 1) {
+            diff.pop_back();
+            cout << "Decreased difficulty to: " << diff << endl;
+        }
+            } else {
+        if (diff.size() < 5) { 
+            diff += '0';
+            cout << "Increased difficulty to: " << diff << endl;
+        }
+    }
+
     }
 
        /* Blokas b = formuotiBloka(transakcijos, diff);
@@ -116,10 +126,18 @@ Transakcija generuotiTransakcija(vector<Vartotojas> &var)
     {
         r = rand() % var.size();
     }
-    while (a == 0)
+
+    float maxAmount = var[s].getBal() * 0.5f;
+    if (maxAmount > 0) {
+        a = (rand() % int(maxAmount)) + 1; 
+    } else {
+        a = 0;
+    }
+
+    /*while (a == 0)
     {
         a = rand() % int(var[s].getBal());
-    }
+    }*/
     /*
     if (var[s].getBal() > 1)
     {

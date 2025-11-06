@@ -1,4 +1,3 @@
-// merkle.cpp
 #include "header.h"
 
 shared_ptr<MerkleNode> buildMerkleTree(const vector<string>& hashes) {
@@ -19,7 +18,7 @@ shared_ptr<MerkleNode> buildMerkleTree(const vector<string>& hashes) {
                 string combinedHash = stringHash(nodes[i]->hash + nodes[i + 1]->hash);
                 newLevel.push_back(make_shared<MerkleNode>(combinedHash, nodes[i], nodes[i + 1]));
             } else {
-                // Odd number of nodes, duplicate the last one
+                
                 string combinedHash = stringHash(nodes[i]->hash + nodes[i]->hash);
                 newLevel.push_back(make_shared<MerkleNode>(combinedHash, nodes[i], nodes[i]));
             }

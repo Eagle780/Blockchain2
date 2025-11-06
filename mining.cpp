@@ -1,4 +1,3 @@
-// mining.cpp
 #include "header.h"
 #include <chrono>
 
@@ -23,31 +22,27 @@ vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const 
     
     string prevHash;
     if (blockchain.size() == 0) {
-        prevHash = string(64, '0'); // Genesis block
+        prevHash = string(64, '0'); 
     } else {
-        prevHash = blockchain.back().getHash(); // Last block in actual chain
+        prevHash = blockchain.back().getHash();
     }
 
-    // Create a temporary copy of transactions to avoid modifying original too early
     vector<Transakcija> tempTransactions = transactions;
     
     for (int i = 0; i < count && !tempTransactions.empty(); i++) {
         vector<Transakcija> blockTransactions;
         int transactionCount = min(100, (int)tempTransactions.size());
         blockTransactions.reserve(transactionCount);
-        
-        // Select random transactions for this block
+    
         for (int j = 0; j < transactionCount; j++) {
             if (tempTransactions.empty()) break;
             
             int randomIndex = rand() % tempTransactions.size();
             
-            // Validate transaction before including
             if (validateTransaction(tempTransactions[randomIndex], users)) {
                 blockTransactions.push_back(tempTransactions[randomIndex]);
             }
             
-            // Remove the transaction from temp pool regardless of validation
             tempTransactions[randomIndex] = move(tempTransactions.back());
             tempTransactions.pop_back();
         }
@@ -63,17 +58,13 @@ vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const 
     return candidates;
 }
 
-// Transaction validation function
 bool validateTransaction(const Transakcija& transaction, const vector<Vartotojas>& users) {
-    // Check transaction ID (hash verification)
     string calculatedID = stringHash(transaction.getSender() + transaction.getReceiver() + to_string(transaction.getAmount()));
     if (calculatedID != transaction.getID()) {
         cout << "Transaction hash validation failed!" << endl;
         return false;
     }
-    
-    // In real implementation, we would check sender balance here
-    // For now, we'll assume all transactions are valid
+
      bool senderFound = false;
     float senderBalance = 0.0f;
     
@@ -114,13 +105,11 @@ void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks,
         while (!blockMined) {
             if (mineBlock(block, difficulty, maxAttempts, attemptsMade)) {
                 lock_guard<mutex> lock(blockchainMutex);
-                if (!blockMined) { // Double check after acquiring lock
+                if (!blockMined) { 
                     blockMined = true;
-                    
-                    // Update blockchain
+    
                     blockchain.pushBack(block);
-                    
-                    // Update user balances and remove mined transactions
+             
                     for (const auto& tx : block.getTran()) {
                         for (auto& user : users) {
                             if (tx.getSender() == user.getPK()) {
@@ -129,8 +118,7 @@ void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks,
                                 user.updateBal(user.getBal() + tx.getAmount());
                             }
                         }
-                        
-                        // Remove from transactions pool
+           
                         auto it = find_if(transactions.begin(), transactions.end(),
                             [&](const Transakcija& t) { return t.getID() == tx.getID(); });
                         if (it != transactions.end()) {
@@ -145,7 +133,6 @@ void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks,
                 break;
             }
             
-            // Check time limit
             auto currentTime = steady_clock::now();
             if (duration_cast<seconds>(currentTime - startTime).count() >= maxTimeSeconds) {
                 break;
@@ -153,13 +140,11 @@ void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks,
         }
     };
     
-    // Start mining threads
     vector<thread> threads;
     for (int i = 0; i < candidateBlocks.size(); i++) {
         threads.emplace_back(miningFunction, i, candidateBlocks[i]);
     }
-    
-    // Wait for completion or timeout
+
     auto startTime = steady_clock::now();
     for (auto& t : threads) {
         if (t.joinable()) {

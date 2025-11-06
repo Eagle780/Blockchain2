@@ -106,12 +106,13 @@ private:
 public:
     Blokas(string mr, string di, vector<Transakcija> tr)
     {
-        prevHash = string(64, '0');
+        prevHash = "";
         version = "1.0";
         merkleRoot = mr;
         nonce = 0;
         difficulty = di;
         transakcijos = tr;
+        setDate();
     }
     void changeNonce(int n)
     {
@@ -213,14 +214,11 @@ Blokas formuotiBloka(vector<Transakcija> &tran, const string &diff);
 string visuTranHash(const vector<Transakcija> &tr);
 void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff, vector<Vartotojas> &var);
 
-
-// Improved mining functions
 bool mineBlock(Blokas& block, const string& difficulty, int maxAttempts, int& attemptsMade);
 vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const string& difficulty, int count, const vector<Vartotojas>& user, const Blockchain& bockchain);
 void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks, vector<Transakcija>& transactions, 
                         string& difficulty, vector<Vartotojas>& users, int maxTimeSeconds);
 
-// Transaction validation
 bool validateTransaction(const Transakcija& transaction, const vector<Vartotojas>& users);
 
 //UTXO model
