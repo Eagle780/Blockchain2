@@ -69,12 +69,12 @@ blockchain2/
 **Komanda kompiliavimui:**
 
 ``
-g++ -o blockchain main.cpp hash.cpp merkle.cpp mining.cpp -std=c++17 -pthread
+   g++ -o blockchain main.cpp hash.cpp merkle.cpp mining.cpp -std=c++17 -pthread
 ``
 
 **Programos paleidimas:**
 
 ``
-./blockchain
+   ./blockchain
 ``
 
