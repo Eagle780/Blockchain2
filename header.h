@@ -25,21 +25,21 @@ class Blokas;
 class Blockchain;
 struct MerkleNode;
 
-
 string stringHash(string str);
 
-struct MerkleNode {
+struct MerkleNode
+{
     string hash;
     shared_ptr<MerkleNode> left;
     shared_ptr<MerkleNode> right;
-    
-    MerkleNode(const string& h) : hash(h), left(nullptr), right(nullptr) {}
-    MerkleNode(const string& h, shared_ptr<MerkleNode> l, shared_ptr<MerkleNode> r) 
+
+    MerkleNode(const string &h) : hash(h), left(nullptr), right(nullptr) {}
+    MerkleNode(const string &h, shared_ptr<MerkleNode> l, shared_ptr<MerkleNode> r)
         : hash(h), left(l), right(r) {}
 };
 
-shared_ptr<MerkleNode> buildMerkleTree(const vector<string>& hashes);
-string calculateMerkleRoot(const vector<Transakcija>& transactions);
+shared_ptr<MerkleNode> buildMerkleTree(const vector<string> &hashes);
+string calculateMerkleRoot(const vector<Transakcija> &transactions);
 
 class Vartotojas
 {
@@ -136,10 +136,12 @@ public:
     {
         return prevHash + date + version + merkleRoot + to_string(nonce) + difficulty;
     }
-    string getHash() const {
+    string getHash() const
+    {
         return stringHash(combine());
     }
-    string calculateMerkleRoot() const {
+    string calculateMerkleRoot() const
+    {
         return ::calculateMerkleRoot(transakcijos);
     }
     const vector<Transakcija> &getTran() const
@@ -214,21 +216,21 @@ Blokas formuotiBloka(vector<Transakcija> &tran, const string &diff);
 string visuTranHash(const vector<Transakcija> &tr);
 void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff, vector<Vartotojas> &var);
 
-bool mineBlock(Blokas& block, const string& difficulty, int maxAttempts, int& attemptsMade);
-vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const string& difficulty, int count, const vector<Vartotojas>& user, const Blockchain& bockchain);
-void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks, vector<Transakcija>& transactions, 
-                        string& difficulty, vector<Vartotojas>& users, int maxTimeSeconds);
+bool mineBlock(Blokas &block, const string &difficulty, int maxAttempts, int &attemptsMade);
+vector<Blokas> generateCandidateBlocks(vector<Transakcija> &transactions, const string &difficulty, int count, const vector<Vartotojas> &user, const Blockchain &bockchain);
+void parallelMineBlocks(Blockchain &blockchain, vector<Blokas> &candidateBlocks, vector<Transakcija> &transactions,
+                        string &difficulty, vector<Vartotojas> &users, int maxTimeSeconds);
 
-bool validateTransaction(const Transakcija& transaction, const vector<Vartotojas>& users);
+bool validateTransaction(const Transakcija &transaction, const vector<Vartotojas> &users);
 
-//UTXO model
+// UTXO model
 /*class UTXO {
 private:
     string txId;
     string owner;
     float amount;
     bool spent;
-    
+
 public:
     UTXO(const string& id, const string& own, float amt) : txId(id), owner(own), amount(amt), spent(false) {}
     string getTxId() const { return txId; }
