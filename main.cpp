@@ -40,7 +40,7 @@ int main()
     cout << "transakcijos sugeneruotos" << endl;
 
     int miningRound = 1;
-    int baseTimeLimit = 5; 
+    int baseTimeLimit = 5;
 
     while (!transakcijos.empty() && miningRound <= 10)
     {
@@ -56,27 +56,32 @@ int main()
         break;}
 
         parallelMineBlocks(blockchain, candidateBlocks, transakcijos, diff, vartotojai, baseTimeLimit);
-    
+
         miningRound++;
-    
-        if (miningRound % 3 == 0 && diff.size() > 2) {
-        if (blockchain.size() == 0 || blockchain.back().getHash().find(diff) != 0) {
 
-        if (diff.size() > 1) {
-            diff.pop_back();
-            //cout << "Sumazintas sudetingumas iki: " << diff << endl;
+        if (miningRound % 3 == 0 && diff.size() > 2)
+        {
+            if (blockchain.size() == 0 || blockchain.back().getHash().find(diff) != 0)
+            {
+
+                if (diff.size() > 1)
+                {
+                    diff.pop_back();
+                    cout << "Sumazintas sudetingumas iki: " << diff << endl;
+                }
+            }
+            else
+            {
+                if (diff.size() < 5)
+                {
+                    diff += '0';
+                    cout << "Padidintas sudetingumas iki: " << diff << endl;
+                }
+            }
         }
-            } else {
-        if (diff.size() < 5) { 
-            diff += '0';
-           // cout << "Padidintas sudetingumas iki: " << diff << endl;
-        }
-    }
 
-    }
-
-       /* Blokas b = formuotiBloka(transakcijos, diff);
-        kastiBloka(blockchain, b, transakcijos, diff, vartotojai);*/
+        /* Blokas b = formuotiBloka(transakcijos, diff);
+         kastiBloka(blockchain, b, transakcijos, diff, vartotojai);*/
     }
 
     cout << "blockchainas sudarytas" << endl;
@@ -128,9 +133,12 @@ Transakcija generuotiTransakcija(vector<Vartotojas> &var)
     }
 
     float maxAmount = var[s].getBal() * 0.5f;
-    if (maxAmount > 0) {
-        a = (rand() % int(maxAmount)) + 1; 
-    } else {
+    if (maxAmount > 0)
+    {
+        a = (rand() % int(maxAmount)) + 1;
+    }
+    else
+    {
         a = 0;
     }
 
@@ -182,7 +190,7 @@ Blokas formuotiBloka(vector<Transakcija> &tran, const string &diff)
             break;*/
     }
     string merkleRoot = calculateMerkleRoot(tr);
-    return Blokas(merkleRoot, diff, tr); 
+    return Blokas(merkleRoot, diff, tr);
 }
 
 string visuTranHash(const vector<Transakcija> &tr)
