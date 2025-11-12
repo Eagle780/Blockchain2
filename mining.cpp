@@ -61,7 +61,7 @@ vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const 
 bool validateTransaction(const Transakcija& transaction, const vector<Vartotojas>& users) {
     string calculatedID = stringHash(transaction.getSender() + transaction.getReceiver() + to_string(transaction.getAmount()));
     if (calculatedID != transaction.getID()) {
-        cout << "Transaction hash validation failed!" << endl;
+        cout << "Transakcijos hash patvirtinimas nepavyko!" << endl;
         return false;
     }
 
@@ -77,13 +77,13 @@ bool validateTransaction(const Transakcija& transaction, const vector<Vartotojas
     }
     
     if (!senderFound) {
-        cout << "Sender not found!" << endl;
+        cout << "Siuntejas nerastas!" << endl;
         return false;
     }
     
     if (senderBalance < transaction.getAmount()) {
-        cout << "Insufficient balance! Sender: " << transaction.getSender() 
-             << " Balance: " << senderBalance << " Amount: " << transaction.getAmount() << endl;
+        //cout << "Nepakankamas balansas! Siuntejas: " << transaction.getSender() 
+           //  << " Balansas: " << senderBalance << " Kiekis: " << transaction.getAmount() << endl;
         return false;
     }
     
@@ -126,9 +126,9 @@ void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks,
                         }
                     }
                     
-                    cout << "Thread " << threadId << " successfully mined block!" << endl;
-                    cout << "Block hash: " << stringHash(block.combine()) << endl;
-                    cout << "Attempts made: " << attemptsMade << endl;
+                    cout << "Thread " << threadId << " sekmingai iskase bloka!" << endl;
+                    cout << "Bloko hash: " << stringHash(block.combine()) << endl;
+                    cout << "Bandymu skaicius: " << attemptsMade << endl;
                 }
                 break;
             }
@@ -153,6 +153,6 @@ void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks,
     }
     
     if (!blockMined) {
-        cout << "No block mined in " << maxTimeSeconds << " seconds. Increasing time for next round." << endl;
+        cout << "Per " << maxTimeSeconds << " sekundes nebuvo iskastas nei vienas blokas, didinamas laikas" << endl;
     }
 }

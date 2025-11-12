@@ -31,9 +31,9 @@ int main()
         transakcijos.push_back(tr);
         if (i > 9900)
         {
-            cout << "Sender: " << tr.getSender() << endl;
-            cout << "Receiver: " << tr.getReceiver() << endl;
-            cout << "Amount: " << tr.getAmount() << endl;
+            cout << "Siuntejas: " << tr.getSender() << endl;
+            cout << "Gavejas: " << tr.getReceiver() << endl;
+            cout << "Kiekis: " << tr.getAmount() << endl;
             cout << "ID: " << tr.getID() << endl;
         }
     }
@@ -45,14 +45,14 @@ int main()
     while (!transakcijos.empty() && miningRound <= 10)
     {
         cout << "\n--- Mining Round " << miningRound << " ---" << endl;
-        cout << "Remaining transactions: " << transakcijos.size() << endl;
-        cout << "Current difficulty: " << diff << endl;
+        cout << "Likusios transakcijos: " << transakcijos.size() << endl;
+        cout << "Sudetingumas: " << diff << endl;
 
          auto candidateBlocks = generateCandidateBlocks(transakcijos, diff, 5, vartotojai, blockchain);
-        cout << "Generated " << candidateBlocks.size() << " candidate blocks" << endl;
+        cout << "Sugeneruoti " << candidateBlocks.size() << " kandidatiniai blokai" << endl;
     
         if (candidateBlocks.empty()) {
-        cout << "No valid candidate blocks generated. Ending mining." << endl;
+        cout << "Kandidatiniai blokai nesugeneruoti. Kasimas nutraukiamas" << endl;
         break;}
 
         parallelMineBlocks(blockchain, candidateBlocks, transakcijos, diff, vartotojai, baseTimeLimit);
@@ -64,12 +64,12 @@ int main()
 
         if (diff.size() > 1) {
             diff.pop_back();
-            cout << "Decreased difficulty to: " << diff << endl;
+            //cout << "Sumazintas sudetingumas iki: " << diff << endl;
         }
             } else {
         if (diff.size() < 5) { 
             diff += '0';
-            cout << "Increased difficulty to: " << diff << endl;
+           // cout << "Padidintas sudetingumas iki: " << diff << endl;
         }
     }
 

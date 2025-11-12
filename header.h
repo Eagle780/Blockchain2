@@ -218,7 +218,7 @@ bool mineBlock(Blokas& block, const string& difficulty, int maxAttempts, int& at
 vector<Blokas> generateCandidateBlocks(vector<Transakcija>& transactions, const string& difficulty, int count, const vector<Vartotojas>& user, const Blockchain& bockchain);
 void parallelMineBlocks(Blockchain& blockchain, vector<Blokas>& candidateBlocks, vector<Transakcija>& transactions, 
                         string& difficulty, vector<Vartotojas>& users, int maxTimeSeconds);
-
+ 
 bool validateTransaction(const Transakcija& transaction, const vector<Vartotojas>& users);
 
 //UTXO model
