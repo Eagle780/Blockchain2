@@ -41,19 +41,76 @@ struct MerkleNode
 shared_ptr<MerkleNode> buildMerkleTree(const vector<string> &hashes);
 string calculateMerkleRoot(const vector<Transakcija> &transactions);
 
+class TxOut
+{
+private:
+    string receiver;
+    int amount;
+
+public:
+    TxOut(const string &rec, const int &am) : receiver(rec), amount(am) {}
+    string getReceiver() const { return receiver; }
+    int getAmount() const { return amount; }
+};
+
+class TxIn
+{
+private:
+    string prev_tx_id;
+    int index;
+
+public:
+    TxIn(const string &id, const int &index) : prev_tx_id(id), index(index) {}
+    string getPrevId() const { return prev_tx_id; }
+    int getPrevIndex() const { return index; }
+};
+
+class Transakcija
+{
+private:
+    string tx_hash;
+    vector<TxIn> inputs;
+    vector<TxOut> outputs;
+
+public:
+    Transakcija(const string &hash, const vector<TxIn> &in, vector<TxOut> out) : tx_hash(hash), inputs(in), outputs(out) {}
+    Transakcija(const string &hash) : tx_hash(hash) {}
+    string getTxHash() const { return tx_hash; }
+    vector<TxIn> getInputs() const { return inputs; }
+    vector<TxOut> getOutputs() const { return outputs; }
+    vector<TxIn> setInputs(vector<TxIn> in) { inputs = in; }
+    vector<TxOut> setOutputs(vector<TxOut> out) { outputs = out; }
+};
+
+// UTXO (Unspent Transaction Output) structure
+struct UTXO
+{
+    string txId;     // ID of the transaction that created this output
+    int outputIndex; // Index of this output in the transaction
+    string owner;    // Public key of the owner
+    int amount;      // Amount in this output
+    bool spent;      // Whether this UTXO has been spent
+
+    // patikrink, ar jei transakcija jau egzistuoja, naudoja jos hasha, kuris sudarytas is visu kitu jos elementu hashu
+    UTXO(const string &id, int idx, const string &own, int amt)
+        : txId(id), outputIndex(idx), owner(own), amount(amt), spent(false) {}
+    string getId() const { return txId + "_" + to_string(outputIndex); }
+};
+
+// Global UTXO pool - tracks all unspent outputs
+extern vector<UTXO> utxoPool;
+
 class Vartotojas
 {
 private:
     string vardas;
-    string public_key; // 64 simboliu ilgio random simboliu stringas
-    float balansas;
+    string public_key;
 
 public:
     Vartotojas(string p_k)
     {
         vardas = randomVardas();
         public_key = p_k;
-        balansas = (rand() % 999901) + 100;
     }
     string randomVardas()
     {
@@ -61,35 +118,9 @@ public:
         string vardas = vardai[rand() % vardai.size()];
         return vardas;
     }
-    void updateBal(float num)
-    {
-        balansas = num;
-    }
     inline string getVardas() const { return vardas; }
     inline string getPK() const { return public_key; }
-    inline float getBal() const { return balansas; }
-};
-
-class Transakcija
-{
-private:
-    string transaction_id;
-    string sender;
-    string receiver;
-    float amount;
-
-public:
-    Transakcija(string s, string r, float a)
-    {
-        sender = s;
-        receiver = r;
-        amount = a;
-        transaction_id = stringHash(s + r + to_string(a));
-    }
-    inline string getID() const { return transaction_id; }
-    inline string getSender() const { return sender; }
-    inline string getReceiver() const { return receiver; }
-    inline float getAmount() const { return amount; }
+    inline float getBal() const { return calculateBalance(public_key); }
 };
 
 class Blokas
@@ -153,7 +184,12 @@ public:
         int sum = 0;
         for (auto const &tr : transakcijos)
         {
-            sum += tr.getAmount();
+            int trSum = 0;
+            for (auto const &out : tr.getOutputs())
+            {
+                trSum += out.getAmount();
+            }
+            sum += trSum;
         }
         return sum;
     }
@@ -223,17 +259,26 @@ void parallelMineBlocks(Blockchain &blockchain, vector<Blokas> &candidateBlocks,
 
 bool validateTransaction(const Transakcija &transaction, const vector<Vartotojas> &users);
 
+float calculateBalance(string p_k);
+void initializeUTXOPool(const vector<Vartotojas> &users);
+void spendUTXOs(const vector<TxIn> &inputs);
+void addNewUTXOs(const string &txId, const vector<TxOut> &outputs);
+
 // UTXO model
-/*class UTXO {
+/*
+class UTXO
+{
 private:
     string txId;
+    int output_index;
     string owner;
     float amount;
     bool spent;
 
 public:
-    UTXO(const string& id, const string& own, float amt) : txId(id), owner(own), amount(amt), spent(false) {}
+    UTXO(const string &id, const int &in, const string &own, float amt) : txId(id), output_index(in), owner(own), amount(amt), spent(false) {}
     string getTxId() const { return txId; }
+    int getOutputIn() const { return output_index; }
     string getOwner() const { return owner; }
     float getAmount() const { return amount; }
     bool isSpent() const { return spent; }
@@ -241,4 +286,5 @@ public:
 };
 
 // Global UTXO pool
-extern vector<UTXO> utxoPool;*/
+extern
+*/

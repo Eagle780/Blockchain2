@@ -25,16 +25,20 @@ int main()
         }
     }
     cout << "vartotojai sugeneruoti" << endl;
+
+    // Initialize UTXO pool with starting balances for each user
+    initializeUTXOPool(vartotojai);
+    cout << "UTXO pool'as sukurtas" << endl;
     for (int i = 0; i < trInt; i++)
     {
         Transakcija tr = generuotiTransakcija(vartotojai);
         transakcijos.push_back(tr);
         if (i > 9900)
         {
-            cout << "Sender: " << tr.getSender() << endl;
-            cout << "Receiver: " << tr.getReceiver() << endl;
-            cout << "Amount: " << tr.getAmount() << endl;
-            cout << "ID: " << tr.getID() << endl;
+            cout << "Transaction " << i << " created" << endl;
+            cout << "Inputs: " << tr.getInputs().size() << endl;
+            cout << "Outputs: " << tr.getOutputs().size() << endl;
+            cout << "ID: " << tr.getTxHash() << endl;
         }
     }
     cout << "transakcijos sugeneruotos" << endl;
@@ -126,53 +130,60 @@ string generuotiPK(vector<string> &pkvec)
 
 Transakcija generuotiTransakcija(vector<Vartotojas> &var)
 {
-    int s = rand() % var.size();
-    int r = rand() % var.size();
-    float a = 0;
-    while (var[s].getPK() == var[r].getPK())
+    int senderIdx = rand() % var.size();
+    int receiverIdx = rand() % var.size();
+
+    while (var[senderIdx].getPK() == var[receiverIdx].getPK())
     {
-        r = rand() % var.size();
+        receiverIdx = rand() % var.size();
     }
 
-    float maxAmount = var[s].getBal() * 0.5f;
-    if (maxAmount > 0)
+    string senderPK = var[senderIdx].getPK();
+    string receiverPK = var[receiverIdx].getPK();
+
+    // Find unspent UTXOs for the sender
+    vector<UTXO> senderUTXOs;
+    for (const auto &utxo : utxoPool)
     {
-        a = (rand() % int(maxAmount)) + 1;
-    }
-    else
-    {
-        a = 0;
+        if (utxo.owner == senderPK && !utxo.spent)
+        {
+            senderUTXOs.push_back(utxo);
+        }
     }
 
-    /*while (a == 0)
+    if (senderUTXOs.empty())
     {
-        a = rand() % int(var[s].getBal());
-    }*/
-    /*
-    if (var[s].getBal() > 1)
-    {
-        while (a == 0)
-        {
-            a = rand() % int(var[s].getBal()) / 2.0;
-        }
+        // Return a transaction with no inputs (will be invalid)
+        Transakcija tr(stringHash("empty_" + senderPK));
+        return tr;
     }
-    else
+
+    // Select UTXOs to spend (for simplicity, just pick one)
+    vector<TxIn> inputs;
+    int totalInput = 0;
+
+    // Use a random UTXO as input
+    int utxoIdx = rand() % senderUTXOs.size();
+    UTXO selectedUtxo = senderUTXOs[utxoIdx];
+    inputs.push_back(TxIn(selectedUtxo.txId, selectedUtxo.outputIndex));
+    totalInput = selectedUtxo.amount;
+
+    // Generate transaction amount (less than available input)
+    int amount = (totalInput > 1) ? (rand() % (totalInput - 1)) + 1 : 1;
+
+    // Create outputs: one to receiver, one as change to sender (if any)
+    vector<TxOut> outputs;
+    outputs.push_back(TxOut(receiverPK, amount));
+
+    int change = totalInput - amount;
+    if (change > 0)
     {
-        a = 2.0;
-        random_device rd;
-        mt19937 gen(rd());
-        uniform_real_distribution<> dis(0.0, 1.0);
-        while (a >= var[s].getBal())
-        {
-            a = dis(gen);
-        }
+        outputs.push_back(TxOut(senderPK, change));
     }
-    int bal1 = var[s].getBal() - a;
-    var[s].updateBal(bal1);
-    int bal2 = var[r].getBal() + a;
-    var[r].updateBal(bal2);
-    */
-    Transakcija tr(var[s].getPK(), var[r].getPK(), a);
+
+    // Create transaction ID
+    string txHash = stringHash(senderPK + receiverPK + to_string(amount));
+    Transakcija tr(txHash, inputs, outputs);
 
     return tr;
 }
@@ -200,11 +211,11 @@ string visuTranHash(const vector<Transakcija> &tr)
     if (tr.empty())
         return string();
 
-    string hash = tr[0].getID();
+    string hash = tr[0].getTxHash();
     int n = (int)tr.size();
     for (int i = 1; i < n; i++)
     {
-        hash = stringHash(hash + tr[i].getID());
+        hash = stringHash(hash + tr[i].getTxHash());
     }
     return hash;
 }
@@ -212,7 +223,6 @@ string visuTranHash(const vector<Transakcija> &tr)
 void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff, vector<Vartotojas> &var)
 {
     int max = 100000;
-    float bal;
     if (b.size() != 0)
     {
         string hash = stringHash(b.back().combine());
@@ -233,25 +243,17 @@ void kastiBloka(Blockchain &b, Blokas a, vector<Transakcija> &tr, string &diff, 
             }
             for (auto const &tran : a.getTran())
             {
-                for (int i = 0; i < tr.size(); i++)
+                // Process UTXO changes
+                spendUTXOs(tran.getInputs());
+                addNewUTXOs(tran.getTxHash(), tran.getOutputs());
+
+                // Remove from pending transactions
+                for (int j = 0; j < tr.size(); j++)
                 {
-                    if (tran.getID() == tr[i].getID())
+                    if (tran.getTxHash() == tr[j].getTxHash())
                     {
-                        tr[i] = move(tr.back());
+                        tr[j] = move(tr.back());
                         tr.pop_back();
-                    }
-                }
-                for (auto &v : var)
-                {
-                    if (tran.getSender() == v.getPK())
-                    {
-                        bal = v.getBal() - tran.getAmount();
-                        v.updateBal(bal);
-                    }
-                    else if (tran.getReceiver() == v.getPK())
-                    {
-                        bal = v.getBal() + tran.getAmount();
-                        v.updateBal(bal);
                     }
                 }
             }
