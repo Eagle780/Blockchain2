@@ -286,6 +286,7 @@ public:
     float getAmount() const { return amount; }
     bool isSpent() const { return spent; }
     void markSpent() { spent = true; }
+    string getUTXOId() const { return txId + "_" + to_string(outputIndex); }
 };
 
 // Global UTXO pool

@@ -49,17 +49,15 @@ int main()
     while (!transakcijos.empty() && miningRound <= 10)
     {
         cout << "\n--- Mining Round " << miningRound << " ---" << endl;
-        cout << "Remaining transactions: " << transakcijos.size() << endl;
-        cout << "Current difficulty: " << diff << endl;
+        cout << "Likusios transakcijos: " << transakcijos.size() << endl;
+        cout << "Sudetingumas: " << diff << endl;
 
-        auto candidateBlocks = generateCandidateBlocks(transakcijos, diff, 5, vartotojai, blockchain);
-        cout << "Generated " << candidateBlocks.size() << " candidate blocks" << endl;
-
-        if (candidateBlocks.empty())
-        {
-            cout << "No valid candidate blocks generated. Ending mining." << endl;
-            break;
-        }
+         auto candidateBlocks = generateCandidateBlocks(transakcijos, diff, 5, vartotojai, blockchain);
+        cout << "Sugeneruoti " << candidateBlocks.size() << " kandidatiniai blokai" << endl;
+    
+        if (candidateBlocks.empty()) {
+        cout << "Kandidatiniai blokai nesugeneruoti. Kasimas nutraukiamas" << endl;
+        break;}
 
         parallelMineBlocks(blockchain, candidateBlocks, transakcijos, diff, vartotojai, baseTimeLimit);
 
@@ -73,7 +71,7 @@ int main()
                 if (diff.size() > 1)
                 {
                     diff.pop_back();
-                    cout << "Decreased difficulty to: " << diff << endl;
+                    cout << "Sumazintas sudetingumas iki: " << diff << endl;
                 }
             }
             else
@@ -81,7 +79,7 @@ int main()
                 if (diff.size() < 5)
                 {
                     diff += '0';
-                    cout << "Increased difficulty to: " << diff << endl;
+                    cout << "Padidintas sudetingumas iki: " << diff << endl;
                 }
             }
         }

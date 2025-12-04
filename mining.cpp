@@ -154,10 +154,10 @@ void parallelMineBlocks(Blockchain &blockchain, vector<Blokas> &candidateBlocks,
                             transactions.erase(it);
                         }
                     }
-
-                    cout << "Thread " << threadId << " successfully mined block!" << endl;
-                    cout << "Block hash: " << stringHash(block.combine()) << endl;
-                    cout << "Attempts made: " << attemptsMade << endl;
+                    
+                    cout << "Thread " << threadId << " sekmingai iskase bloka!" << endl;
+                    cout << "Bloko hash: " << stringHash(block.combine()) << endl;
+                    cout << "Bandymu skaicius: " << attemptsMade << endl;
                 }
                 break;
             }
@@ -184,9 +184,8 @@ void parallelMineBlocks(Blockchain &blockchain, vector<Blokas> &candidateBlocks,
             t.join();
         }
     }
-
-    if (!blockMined)
-    {
-        cout << "No block mined in " << maxTimeSeconds << " seconds. Increasing time for next round." << endl;
+    
+    if (!blockMined) {
+        cout << "Per " << maxTimeSeconds << " sekundes nebuvo iskastas nei vienas blokas, didinamas laikas" << endl;
     }
 }
