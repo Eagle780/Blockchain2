@@ -73,36 +73,44 @@ vector<Blokas> generateCandidateBlocks(vector<Transakcija> &transactions, const 
 
 bool validateTransaction(const Transakcija &transaction, const vector<Vartotojas> &users)
 {
-    string calculatedID = stringHash(transaction.getSender() + transaction.getReceiver() + to_string(transaction.getAmount()));
-    if (calculatedID != transaction.getID()) {
-        cout << "Transakcijos hash patvirtinimas nepavyko!" << endl;
+    // Check if transaction has inputs and outputs
+    vector<TxIn> inputs = transaction.getInputs();
+    vector<TxOut> outputs = transaction.getOutputs();
+    
+    if (inputs.empty() || outputs.empty()) {
         return false;
     }
-
-    bool senderFound = false;
-    float senderBalance = 0.0f;
-
-    for (const auto &user : users)
-    {
-        if (user.getPK() == transaction.getSender())
-        {
-            senderFound = true;
-            senderBalance = user.getBal();
-            break;
+    
+    // Validate that all inputs reference valid UTXOs
+    int totalInput = 0;
+    for (const auto& input : inputs) {
+        bool found = false;
+        for (const auto& utxo : utxoPool) {
+            if (utxo.txId == input.getPrevId() && 
+                utxo.outputIndex == input.getPrevIndex() && 
+                !utxo.spent) {
+                totalInput += utxo.amount;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            cout << "Input UTXO not found or already spent!" << endl;
+            return false;
         }
     }
     
-    if (!senderFound) {
-        cout << "Siuntejas nerastas!" << endl;
+    // Validate that outputs don't exceed inputs (no money creation)
+    int totalOutput = 0;
+    for (const auto& output : outputs) {
+        totalOutput += output.getAmount();
+    }
+    
+    if (totalOutput > totalInput) {
+        cout << "Transaction output (" << totalOutput << ") exceeds input (" << totalInput << ")!" << endl;
         return false;
     }
     
-    if (senderBalance < transaction.getAmount()) {
-        //cout << "Nepakankamas balansas! Siuntejas: " << transaction.getSender() 
-           //  << " Balansas: " << senderBalance << " Kiekis: " << transaction.getAmount() << endl;
-        return false;
-    }
-
     return true;
 }
 
@@ -133,21 +141,14 @@ void parallelMineBlocks(Blockchain &blockchain, vector<Blokas> &candidateBlocks,
 
                     for (const auto &tx : block.getTran())
                     {
-                        for (auto &user : users)
-                        {
-                            if (tx.getSender() == user.getPK())
-                            {
-                                user.updateBal(user.getBal() - tx.getAmount());
-                            }
-                            else if (tx.getReceiver() == user.getPK())
-                            {
-                                user.updateBal(user.getBal() + tx.getAmount());
-                            }
-                        }
-
+                        // Process UTXO changes for this transaction
+                        spendUTXOs(tx.getInputs());
+                        addNewUTXOs(tx.getTxHash(), tx.getOutputs());
+                        
+                        // Remove transaction from pending pool
                         auto it = find_if(transactions.begin(), transactions.end(),
                                           [&](const Transakcija &t)
-                                          { return t.getID() == tx.getID(); });
+                                          { return t.getTxHash() == tx.getTxHash(); });
                         if (it != transactions.end())
                         {
                             transactions.erase(it);

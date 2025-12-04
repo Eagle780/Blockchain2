@@ -2,51 +2,54 @@
 
 vector<UTXO> utxoPool;
 
-// Initialize UTXO pool with initial funds for users
-void initializeUTXOPool(const vector<Vartotojas>& users) {
-    utxoPool.clear();
-    for (const auto& user : users) {
-        // Create initial UTXOs for each user
-        string initialTxId = "genesis_" + user.getPK();
-        utxoPool.emplace_back(initialTxId, 0, user.getPK(), user.getBal());
+void initializeUTXOPool(const vector<Vartotojas> &users)
+{
+    // Create initial UTXOs for each user with a random starting balance
+    for (const auto &user : users)
+    {
+        int initialBalance = (rand() % 999901) + 100;
+        // Create a genesis transaction ID for initial UTXOs
+        string genesisId = stringHash("GENESIS_" + user.getPK());
+        UTXO initialUtxo(genesisId, 0, user.getPK(), initialBalance);
+        utxoPool.push_back(initialUtxo);
     }
 }
 
-// Find all UTXOs owned by a specific public key
-vector<UTXO*> findUTXOsByOwner(const string& owner) {
-    vector<UTXO*> result;
-    for (auto& utxo : utxoPool) {
-        if (utxo.getOwner() == owner && !utxo.isSpent()) {
-            result.push_back(&utxo);
-        }
-    }
-    return result;
-}
-
-// Get total balance from UTXOs
-float getBalanceFromUTXO(const string& owner) {
-    float balance = 0.0f;
-    for (const auto& utxo : utxoPool) {
-        if (utxo.getOwner() == owner && !utxo.isSpent()) {
-            balance += utxo.getAmount();
+float calculateBalance(string p_k)
+{
+    float balance = 0;
+    for (const auto &utxo : utxoPool)
+    {
+        if (utxo.owner == p_k && !utxo.spent)
+        {
+            balance += utxo.amount;
         }
     }
     return balance;
 }
 
-// Mark UTXOs as spent
-void markUTXOsAsSpent(const vector<string>& utxoIds) {
-    for (const auto& utxoId : utxoIds) {
-        for (auto& utxo : utxoPool) {
-            if (utxo.getUTXOId() == utxoId && !utxo.isSpent()) {
-                utxo.markSpent();
+void spendUTXOs(const vector<TxIn> &inputs)
+{
+    // Mark UTXOs as spent when they are used as inputs
+    for (const auto &input : inputs)
+    {
+        for (auto &utxo : utxoPool)
+        {
+            if (utxo.txId == input.getPrevId() && utxo.outputIndex == input.getPrevIndex())
+            {
+                utxo.spent = true;
                 break;
             }
         }
     }
 }
 
-// Add new UTXOs to the pool
-void addUTXOsToPool(const vector<UTXO>& newUTXOs) {
-    utxoPool.insert(utxoPool.end(), newUTXOs.begin(), newUTXOs.end());
+void addNewUTXOs(const string &txId, const vector<TxOut> &outputs)
+{
+    // Add new UTXOs to the pool from transaction outputs
+    for (int i = 0; i < outputs.size(); i++)
+    {
+        UTXO newUtxo(txId, i, outputs[i].getReceiver(), outputs[i].getAmount());
+        utxoPool.push_back(newUtxo);
+    }
 }
