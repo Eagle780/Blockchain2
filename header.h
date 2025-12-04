@@ -77,6 +77,8 @@ private:
     string sender;
     string receiver;
     float amount;
+    vector<string> inputUTXOs;  // UTXOs being spent
+    vector<pair<string, float>> outputs; // New UTXOs being created
 
 public:
     Transakcija(string s, string r, float a)
@@ -85,6 +87,26 @@ public:
         receiver = r;
         amount = a;
         transaction_id = stringHash(s + r + to_string(a));
+    }
+
+    Transakcija(string s, string r, float a, 
+                const vector<string>& inputs, 
+                const vector<pair<string, float>>& outputList) {
+        sender = s;
+        receiver = r;
+        amount = a;
+        inputUTXOs = inputs;
+        outputs = outputList;
+        
+        // Create transaction ID from all components
+        string txData = s + r + to_string(a);
+        for (const auto& input : inputs) {
+            txData += input;
+        }
+        for (const auto& output : outputs) {
+            txData += output.first + to_string(output.second);
+        }
+        transaction_id = stringHash(txData);
     }
     inline string getID() const { return transaction_id; }
     inline string getSender() const { return sender; }
@@ -224,21 +246,26 @@ void parallelMineBlocks(Blockchain &blockchain, vector<Blokas> &candidateBlocks,
 bool validateTransaction(const Transakcija &transaction, const vector<Vartotojas> &users);
 
 // UTXO model
-/*class UTXO {
+class UTXO {
 private:
     string txId;
+    int outputIndex;  // Which output in the transaction
     string owner;
     float amount;
     bool spent;
 
 public:
-    UTXO(const string& id, const string& own, float amt) : txId(id), owner(own), amount(amt), spent(false) {}
+    UTXO(const string& id, int index, const string& own, float amt) 
+        : txId(id), outputIndex(index), owner(own), amount(amt), spent(false) {}
+    
     string getTxId() const { return txId; }
+    int getOutputIndex() const { return outputIndex; }
     string getOwner() const { return owner; }
     float getAmount() const { return amount; }
     bool isSpent() const { return spent; }
     void markSpent() { spent = true; }
+    string getUTXOId() const { return txId + "_" + to_string(outputIndex); }
 };
 
 // Global UTXO pool
-extern vector<UTXO> utxoPool;*/
+extern vector<UTXO> utxoPool;
