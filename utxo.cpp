@@ -15,7 +15,7 @@ void initializeUTXOPool(const vector<Vartotojas> &users)
     }
 }
 
-float calculateBalance(string p_k)
+float calculateBalance(const string &p_k)
 {
     float balance = 0;
     for (const auto &utxo : utxoPool)

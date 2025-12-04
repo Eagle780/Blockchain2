@@ -100,6 +100,9 @@ struct UTXO
 // Global UTXO pool - tracks all unspent outputs
 extern vector<UTXO> utxoPool;
 
+// Balance helper (declared before Vartotojas so inline getBal can use it)
+float calculateBalance(const string &p_k);
+
 class Vartotojas
 {
 private:
@@ -259,7 +262,7 @@ void parallelMineBlocks(Blockchain &blockchain, vector<Blokas> &candidateBlocks,
 
 bool validateTransaction(const Transakcija &transaction, const vector<Vartotojas> &users);
 
-float calculateBalance(string p_k);
+// float calculateBalance(string p_k);
 void initializeUTXOPool(const vector<Vartotojas> &users);
 void spendUTXOs(const vector<TxIn> &inputs);
 void addNewUTXOs(const string &txId, const vector<TxOut> &outputs);
